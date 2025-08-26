@@ -48,7 +48,7 @@ if(-not (Test-Path "C:\Program Files\WireGuard\wireguard.exe")){
   if($HashCheck -and ((Get-FileHash -Algorithm SHA256 $Installer).Hash -ne $Hash)){
     exit 1
   }
-  & $Installer /quiet /qn /log ($FolderPath + "\" + $FileName + ".log")
+  & $Installer /quiet /qn /DO_NOT_LAUNCH=1 /log ($FolderPath + "\" + $FileName + ".log")
   Start-Sleep 30
 }
 
