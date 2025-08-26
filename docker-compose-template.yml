@@ -8,7 +8,7 @@ services:
       WG_NAME: {{WG_NAME}}
       WG_IP: {{WG_IP}}
       WG_POOL: {{WG_POOL}}
-      WG_NAMESPACE: {{WG_NAMESPACE}}
+      WG_NAMESPACES: {{WG_NAMESPACES | tojson}} # Изменено: передача массива namespaces
       WG_NAMESERVER: {{WG_NAMESERVER}}
       WG_PORT: {{WG_PORT}}
       WG_ENDPOINT: {{WG_ENDPOINT}}

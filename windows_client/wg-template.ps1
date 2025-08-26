@@ -70,7 +70,7 @@ if($r.StatusCode -eq 200){
   # Write DNS config file
   @{
     "NameServer" = $Config.nameserver;
-    "Namespace" = $Config.namespace;
+    "Namespaces" = $Config.namespaces; # Изменено: Namespaces как массив
     "Name" = $Config.name;
   } | ConvertTo-Json | Out-File -Encoding Default ($FolderPath + "\dns_config.json")
 
@@ -96,7 +96,15 @@ while($True){
   }
 
   # make sure we can reach the on-prem DNS server
-  if(& nslookup -timeout=1 -retry=1 $Config.Namespace $Config.NameServer | where {$_ -like "*timed out*"}){
+  $dns_reachable = $False
+  foreach ($ns in $Config.Namespaces) { # Изменено: проверка для каждого namespace
+    if(-not (& nslookup -timeout=1 -retry=1 $ns $Config.NameServer | where {$_ -like "*timed out*"})){
+      $dns_reachable = $True
+      break
+    }
+  }
+
+  if(-not $dns_reachable){
     # VPN running
     if((Get-Service $ServiceName).Status -eq "Running"){
       # Stop it
@@ -110,8 +118,10 @@ while($True){
   # make sure DNS config is there if the VPN is running
   if(((Get-Service $ServiceName).Status -eq "Running") -and ((Get-DnsClientNrptRule | Measure).Count -eq 0)){
     Add-DnsClientNrptRule -Namespace $Endpoint -NameServers 8.8.8.8 # Avoid internal DNS collisions
-    Add-DnsClientNrptRule -Namespace $Config.namespace -NameServers $Config.nameserver
-    Add-DnsClientNrptRule -Namespace ("." + $Config.namespace) -NameServers $Config.nameserver
+    foreach ($ns in $Config.Namespaces) { # Изменено: создание NRPT для каждого namespace
+      Add-DnsClientNrptRule -Namespace $ns -NameServers $Config.nameserver
+      Add-DnsClientNrptRule -Namespace ("." + $ns) -NameServers $Config.nameserver
+    }
   }
 
   # turn off DNS otherwise

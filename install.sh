@@ -17,9 +17,11 @@ echo -n "Network for clients [10.100.0.0/16]: "
 read i
 WG_POOL=${i:=10.100.0.0/16}
 WG_IP="$(echo $WG_POOL | sed 's/\.[0-9]\/\+[0-9]\+$/.1/')"
-echo -n "DNS namespace to redirect internal traffic [example.local]: "
+# Изменено: запрос нескольких DNS namespaces, разделённых запятыми
+echo -n "DNS namespaces to redirect internal traffic (comma-separated) [example.local]: "
 read i
-WG_NAMESPACE=${i:=example.local}
+WG_NAMESPACES_INPUT=${i:=example.local}
+IFS=',' read -r -a WG_NAMESPACES <<< "$WG_NAMESPACES_INPUT"
 echo -n "DNS server to use for internal traffic [10.10.10.10]: "
 read i
 WG_NAMESERVER=${i:=10.10.10.10}
@@ -79,16 +81,19 @@ fi
 if [ ! -d /opt/ordig ]
 then
   cd /opt
-  git clone https://github.com/nickadam/ordig.git
+  git clone https://github.com/pbaturov/ordig.git
 fi
 cd /opt/ordig
+
+# Изменено: преобразование массива WG_NAMESPACES в JSON-формат
+WG_NAMESPACES_JSON=$(printf '"%s",' "${WG_NAMESPACES[@]}" | sed 's/,$//')
 
 # create docker-compose
 echo '{
   "WG_NAME": "'"${WG_NAME}"'",
   "WG_IP": "'"${WG_IP}"'",
   "WG_POOL": "'"${WG_POOL}"'",
-  "WG_NAMESPACE": "'"${WG_NAMESPACE}"'",
+  "WG_NAMESPACES": ['"${WG_NAMESPACES_JSON}"'],
   "WG_NAMESERVER": "'"${WG_NAMESERVER}"'",
   "WG_PORT": "'"${WG_PORT}"'",
   "WG_ENDPOINT": "'"${WG_ENDPOINT}"'",
