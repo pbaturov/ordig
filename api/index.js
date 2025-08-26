@@ -13,7 +13,7 @@ const wg_name = process.env.WG_NAME || 'wg0'
 const wg_pool = process.env.WG_POOL || '10.10.10.0/24'
 const wg_ip = process.env.WG_IP || '10.10.10.1'
 const wg_endpoint = process.env.WG_ENDPOINT || 'wg.example.com'
-const wg_namespace = process.env.WG_NAMESPACE || 'example.com'
+const wg_namespaces = JSON.parse(process.env.WG_NAMESPACES || '[]')
 const wg_nameserver = process.env.WG_NAMESERVER || '10.10.10.10'
 const wg_port = process.env.WG_PORT || '51280'
 const wg_allowed = process.env.WG_ALLOWED || '10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/24'
@@ -68,7 +68,6 @@ app.use((req, res, next) => {
   }
 })
 
-
 // generate or get server keypair
 init_server(db, (err, server_keypair) => {
   if(err){
@@ -108,7 +107,7 @@ init_server(db, (err, server_keypair) => {
         res.send({
           succeeded: true,
           name: wg_name,
-          namespace: wg_namespace,
+          namespaces: wg_namespaces,
           nameserver: wg_nameserver,
           config: `[Interface]
 Address = ${config.ip}/${wg_pool.split('/')[1]}

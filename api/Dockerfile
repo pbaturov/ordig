@@ -9,7 +9,7 @@ FROM node:14
 
 LABEL maintainer="@nickadam"
 
-ENV TZ America/New_York
+ENV TZ Europe/Moscow
 
 ENV DEBIAN_FRONTEND noninteractive
 

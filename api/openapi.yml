@@ -12,14 +12,14 @@ paths:
   /api/v1/devices/{hostname}/config:
     post:
       summary: Get client device config
-      description: Client can get it's own device config using shared secrets
+      description: Client can get its own device config using shared secrets
       parameters:
         - name: hostname
           in: path
           description: The device hostname
           required: true
           style: simple
-          explode: false,
+          explode: false
           schema:
             type: string
             example: "nick-desktop"
@@ -48,9 +48,11 @@ paths:
                   name:
                     type: string
                     example: wg0
-                  namespace:
-                    type: string
-                    example: example.com
+                  namespaces:
+                    type: array
+                    items:
+                      type: string
+                    example: ["domain1.local", "domain2.local"]
                   nameserver:
                     type: string
                     example: "10.10.10.10"
